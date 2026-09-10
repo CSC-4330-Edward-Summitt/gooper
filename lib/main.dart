@@ -116,6 +116,8 @@ class _MyHomePageState extends State<MyHomePage> {
               '$_counter',
               style: Theme.of(context).textTheme.headlineMedium,
             ),
+            const SizedBox(height: 18),
+            const _WavingGuy(),
           ],
         ),
       ),
@@ -126,4 +128,91 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
   }
+}
+
+class _WavingGuy extends StatefulWidget {
+  const _WavingGuy();
+
+  @override
+  State<_WavingGuy> createState() => _WavingGuyState();
+}
+
+class _WavingGuyState extends State<_WavingGuy>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 700),
+  )..repeat(reverse: true);
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return CustomPaint(
+          painter: _WavingGuyPainter(_controller.value),
+          size: const Size(160, 190),
+        );
+      },
+    );
+  }
+}
+
+class _WavingGuyPainter extends CustomPainter {
+  const _WavingGuyPainter(this.wave);
+
+  final double wave;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = size.width / 2;
+    final skin = Paint()..color = const Color(0xFFFFC58A);
+    final shirt = Paint()..color = const Color(0xFF3F51B5);
+    final dark = Paint()
+      ..color = const Color(0xFF263238)
+      ..strokeWidth = 8
+      ..strokeCap = StrokeCap.round
+      ..style = PaintingStyle.stroke;
+
+    canvas.drawCircle(Offset(center, 38), 26, skin);
+    canvas.drawArc(
+      Rect.fromCircle(center: Offset(center, 34), radius: 25),
+      3.3,
+      3.2,
+      false,
+      Paint()
+        ..color = const Color(0xFF4E342E)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 8
+        ..strokeCap = StrokeCap.round,
+    );
+
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromCenter(center: Offset(center, 100), width: 52, height: 72),
+        const Radius.circular(18),
+      ),
+      shirt,
+    );
+    canvas.drawLine(Offset(center - 14, 136), Offset(center - 22, 176), dark);
+    canvas.drawLine(Offset(center + 14, 136), Offset(center + 22, 176), dark);
+    canvas.drawLine(Offset(center - 26, 82), Offset(center - 50, 116), dark);
+
+    final armAngle = -0.85 + (wave * 1.7);
+    canvas.save();
+    canvas.translate(center + 24, 84);
+    canvas.rotate(armAngle);
+    canvas.drawLine(Offset.zero, const Offset(0, -45), dark);
+    canvas.drawCircle(const Offset(0, -53), 10, skin);
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(_WavingGuyPainter oldDelegate) => oldDelegate.wave != wave;
 }
